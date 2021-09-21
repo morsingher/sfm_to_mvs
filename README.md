@@ -35,6 +35,37 @@ The depth range is deduced from LiDAR and each recorded point in the scan is con
 
 NOTE: I also provide the possibility to generate static self-occlusion masks and use them for masking out self-occluded areas in the images. This is still a bit experimental and disabled by default. If you want to try, use the `ddad/generate_masks.py` script and pass the flag `--mask = True` to the other script above.
 
+### KITTI
+
+I support KITTI odometry sequences, since ground truth pose is easily available, as well as sparse LiDAR scans (at least for most of them). These are the required steps:
+
+- Choose a KITTI sequence. The mapping between odometry sequences and raw data is the following:
+```
+mapping = {
+    "2011_10_03_drive_0027": "00",
+    "2011_10_03_drive_0042": "01",
+    "2011_10_03_drive_0034": "02",
+    "2011_09_26_drive_0067": "03",
+    "2011_09_30_drive_0016": "04",
+    "2011_09_30_drive_0018": "05",
+    "2011_09_30_drive_0020": "06",
+    "2011_09_30_drive_0027": "07",
+    "2011_09_30_drive_0028": "08",
+    "2011_09_30_drive_0033": "09",
+    "2011_09_30_drive_0034": "10"
+}
+```
+- Download the raw data from http://www.cvlibs.net/datasets/kitti/raw_data.php. Specifically, download the "synced+rectified" version, as well as the calibration. 
+- Extract both of them in a directory called e.g. `kitti` as `kitti/images` and `kitti/calib`.
+- Download the raw LiDAR scans from http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_prediction and extract the corresponding folder into something like `kitti/lidar`.
+- Download the ground truth poses from http://www.cvlibs.net/datasets/kitti/eval_odometry.php and extract the corresponding folder into something like `kitti/poses.txt`.
+- Run the script:
+```
+python3 kitti/kitti_to_mvs --kitti_path <path> --output_folder <data_out>
+```
+
+You can optionally pass a lower and upper bound on frames if you want to select a subset of the whole sequence.
+
 ### Contributing
 
 Feel free to add support for more algorithms and dataset (or to suggest meaningful modifications to existing ones). Ideally, produce a script called `<method>_to_mvs.py` and generate data in the required format. 
