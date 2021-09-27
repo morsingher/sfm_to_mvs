@@ -15,7 +15,11 @@ def sfm_to_mvs(args):
 
     x, y, z = [], [], []
 
-    for i in range(args.begin, args.end + 1, args.step):
+    begin = int(args.begin)
+    end = int(args.end)
+    step = int(args.step)
+
+    for i in range(begin, end + 1, step):
 
         # Step 1: get keypoints from LiDAR scan
 
@@ -62,7 +66,7 @@ def sfm_to_mvs(args):
 
         num_neighbors = 20
 
-        same_ids = get_same_view_range(count, int((args.end - args.begin) / args.step) + 1, num_neighbors)
+        same_ids = get_same_view_range(count, int((end - begin) / step) + 1, num_neighbors)
         score = [num_neighbors - abs(n - count) + 1 for n in same_ids]
         
         neighbors = []
@@ -74,7 +78,7 @@ def sfm_to_mvs(args):
         count += 1
 
     f = open(os.path.join(args.output_folder, 'pair.txt'), 'w')
-    f.write('{}'.format(int((args.end - args.begin) / args.step) + 1))
+    f.write('{}'.format(int((end - begin) / step) + 1))
     for i in range(count):
         neighbors = neighbors_out[str(i)]
         f.write('\n{}\n{} '.format(i, len(neighbors)))
