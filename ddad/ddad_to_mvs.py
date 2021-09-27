@@ -53,6 +53,11 @@ def sfm_to_mvs(args):
             depth_min = np.min(values)
             depth_max = np.max(values)
 
+            gt_depth_filename = os.path.join(args.output_folder, 'gt_depth/{:0>8d}.npz'.format(idx))
+            np.savez(gt_depth_filename, depth)
+            gt_depth_filename = os.path.join(args.output_folder, 'gt_depth/{:0>8d}.png'.format(idx))
+            cv2.imwrite(gt_depth_filename, depth)
+
             # Step 2: write calibration and pose file
 
             calib = img['intrinsics']
@@ -151,5 +156,6 @@ if __name__ == '__main__':
     os.makedirs(os.path.join(args.output_folder, 'cameras'))
     os.makedirs(os.path.join(args.output_folder, 'points'))
     os.makedirs(os.path.join(args.output_folder, 'images'))
+    os.makedirs(os.path.join(args.output_folder, 'gt_depth'))
 
     sfm_to_mvs(args)
