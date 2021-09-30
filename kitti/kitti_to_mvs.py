@@ -44,7 +44,11 @@ def sfm_to_mvs(args):
             lines = [line.rstrip() for line in f.readlines()]
             intrinsics = lines[25].split()
             
-        pose_filename = os.path.join(args.kitti_path, 'poses.txt')
+        if (args.use_dvso):
+            pose_filename = os.path.join(args.kitti_path, 'poses_dvso.txt')
+        else:
+            pose_filename = os.path.join(args.kitti_path, 'poses.txt')
+
         with open(pose_filename) as f:
             lines = [line.rstrip() for line in f.readlines()]
             pose = lines[i].split()
@@ -64,7 +68,7 @@ def sfm_to_mvs(args):
 
         # Step 4: generate view selection file
 
-        num_neighbors = 20
+        num_neighbors = 4
 
         same_ids = get_same_view_range(count, int((end - begin) / step) + 1, num_neighbors)
         score = [num_neighbors - abs(n - count) + 1 for n in same_ids]
@@ -85,10 +89,10 @@ def sfm_to_mvs(args):
         for n, s in neighbors:
             f.write('{} {} '.format(n, s))
 
-    plt.plot(x, z)
-    plt.axis('equal')
-    plt.grid()
-    plt.show()
+    # plt.plot(x, z)
+    # plt.axis('equal')
+    # plt.grid()
+    # plt.show()
 
 
 if __name__ == '__main__':
@@ -99,6 +103,7 @@ if __name__ == '__main__':
     parser.add_argument('--begin', default = 5)
     parser.add_argument('--end', default = 625)
     parser.add_argument('--step', default = 1)
+    parser.add_argument('--use_dvso', default = False)
     args = parser.parse_args()
 
     if os.path.exists(args.output_folder):
