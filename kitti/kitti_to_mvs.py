@@ -43,8 +43,6 @@ def sfm_to_mvs(args):
             y.append(pose[7])
             z.append(pose[11])
 
-        write_camera_file(count, intrinsics, pose, args.output_folder, depth_min, depth_max)
-
         # Step 2: copy images
 
         in_img_filename = os.path.join(args.kitti_path, 'images/{:0>10d}.png'.format(i))
@@ -68,6 +66,8 @@ def sfm_to_mvs(args):
 
         depth_min = np.min(values)
         depth_max = np.max(values)
+
+        write_camera_file(count, intrinsics, pose, args.output_folder, depth_min, depth_max)
 
         # Step 4: generate view selection file
 
