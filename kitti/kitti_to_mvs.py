@@ -54,7 +54,7 @@ def sfm_to_mvs(args):
 
         if args.use_dvso_points:
             depth_filename = os.path.join(args.kitti_path, 'keypoints/{:0>6d}.png')
-            depth = read_keypoints(depth_filename, img, calib[1])
+            depth = read_keypoints(depth_filename, img, intrinsics[1])
         else:
             depth_filename = os.path.join(args.kitti_path, 'lidar/{:0>10d}.png'.format(i))
             depth = read_lidar_data(depth_filename)
