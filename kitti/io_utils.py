@@ -1,5 +1,6 @@
 import numpy as np
 import os
+from PIL import Image
 
 def compute_pose(pose, calib):
 
@@ -61,3 +62,21 @@ def get_same_view_range(idx, bound, dim):
     second_half = np.arange(idx + 1, high)
 
     return np.concatenate((first_half, second_half))
+
+def read_lidar_data(path):
+    depth_png = np.array(Image.open(path), dtype=int)
+    assert(np.max(depth_png) > 255)
+    depth = depth_png.astype(np.float32) / 256.0
+    return depth
+
+def read_keypoints(path, img, f):
+
+    kp = Image.open(path)
+
+    kp = np.array(kp).astype(float)
+    kp[kp > 0] = (65535 * 0.54 * f) / (kp[kp > 0] * img.shape[1])
+    kp = np.clip(kp, 0.0, 80.0)
+
+    kp = cv2.resize(kp, (img.shape[1], img.shape[0]), cv2.INTER_LINEAR)
+
+    return kp

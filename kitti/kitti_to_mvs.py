@@ -21,30 +21,16 @@ def sfm_to_mvs(args):
 
     for i in range(begin, end + 1, step):
 
-        # Step 1: get keypoints from LiDAR scan
+        print('Processing image {}...'.format(i))
 
-        depth_filename = os.path.join(args.kitti_path, 'lidar/{:0>10d}.png'.format(i))
-
-        depth_png = np.array(Image.open(depth_filename), dtype=int)
-        assert(np.max(depth_png) > 255)
-        depth = depth_png.astype(np.float32) / 256.0
-
-        cols, rows = np.where(depth > 0.0)
-        values = depth[cols, rows]
-        points_filename = os.path.join(args.output_folder, 'points/{:0>8d}.txt'.format(count))
-        np.savetxt(points_filename, np.vstack((rows, cols, values)).T, delimiter = ' ', fmt = '%f')
-
-        depth_min = np.min(values)
-        depth_max = np.max(values)
-
-        # Step 2: compute calibration and pose
+        # Step 1: compute calibration and pose
 
         calib_filename = os.path.join(args.kitti_path, 'calib/calib_cam_to_cam.txt')
         with open(calib_filename) as f:
             lines = [line.rstrip() for line in f.readlines()]
             intrinsics = lines[25].split()
             
-        if (args.use_dvso):
+        if (args.use_dvso_poses):
             pose_filename = os.path.join(args.kitti_path, 'poses_dvso.txt')
         else:
             pose_filename = os.path.join(args.kitti_path, 'poses.txt')
@@ -59,12 +45,29 @@ def sfm_to_mvs(args):
 
         write_camera_file(count, intrinsics, pose, args.output_folder, depth_min, depth_max)
 
-        # Step 3: copy images
+        # Step 2: copy images
 
         in_img_filename = os.path.join(args.kitti_path, 'images/{:0>10d}.png'.format(i))
         img = cv2.imread(in_img_filename)
         out_img_filename = os.path.join(args.output_folder, 'images/{:0>8d}.jpg'.format(count))
         cv2.imwrite(out_img_filename, img)
+
+        # Step 3: get keypoints from LiDAR scan or DVSO keypoints
+
+        if args.use_dvso_points:
+            depth_filename = os.path.join(args.kitti_path, 'keypoints/{:0>6d}.png')
+            depth = read_keypoints(depth_filename, img, calib[1])
+        else:
+            depth_filename = os.path.join(args.kitti_path, 'lidar/{:0>10d}.png'.format(i))
+            depth = read_lidar_data(depth_filename)
+
+        cols, rows = np.where(depth > 0.0)
+        values = depth[cols, rows]
+        points_filename = os.path.join(args.output_folder, 'points/{:0>8d}.txt'.format(count))
+        np.savetxt(points_filename, np.vstack((rows, cols, values)).T, delimiter = ' ', fmt = '%f')
+
+        depth_min = np.min(values)
+        depth_max = np.max(values)
 
         # Step 4: generate view selection file
 
@@ -103,7 +106,8 @@ if __name__ == '__main__':
     parser.add_argument('--begin', default = 5)
     parser.add_argument('--end', default = 625)
     parser.add_argument('--step', default = 1)
-    parser.add_argument('--use_dvso', default = False)
+    parser.add_argument('--use_dvso_poses', default = False)
+    parser.add_argument('--use_dvso_points', default = False)
     args = parser.parse_args()
 
     if os.path.exists(args.output_folder):
