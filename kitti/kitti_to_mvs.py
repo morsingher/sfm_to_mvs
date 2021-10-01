@@ -53,7 +53,7 @@ def sfm_to_mvs(args):
         # Step 3: get keypoints from LiDAR scan or DVSO keypoints
 
         if args.use_dvso_points:
-            depth_filename = os.path.join(args.kitti_path, 'keypoints/{:0>6d}.png')
+            depth_filename = os.path.join(args.kitti_path, 'keypoints/{:0>6d}.png'.format(i))
             depth = read_keypoints(depth_filename, img, intrinsics[1])
         else:
             depth_filename = os.path.join(args.kitti_path, 'lidar/{:0>10d}.png'.format(i))
