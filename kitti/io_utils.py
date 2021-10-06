@@ -75,8 +75,16 @@ def read_keypoints(path, img, f):
     kp = Image.open(path)
 
     kp = np.array(kp).astype(float)
-    kp[kp > 0] = (65535 * 0.54 * f) / (kp[kp > 0] * img.shape[1])
-    kp = np.clip(kp, 0.0, 80.0)
+    
+    cols, rows = np.where(kp > 0.0)
+    values = kp[cols, rows]
+
+    values = (65535 * 0.54 * f) / (values * img.shape[1])
+    
+    kp[cols, rows] = values
+
+    cols, rows = np.where(np.logical_or(kp < 0.0, kp > 80.0))
+    kp[cols, rows] = 0.0
 
     kp = cv2.resize(kp, (img.shape[1], img.shape[0]), cv2.INTER_LINEAR)
 
