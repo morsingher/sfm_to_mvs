@@ -64,8 +64,8 @@ def sfm_to_mvs(args):
         points_filename = os.path.join(args.output_folder, 'points/{:0>8d}.txt'.format(count))
         np.savetxt(points_filename, np.vstack((rows, cols, values)).T, delimiter = ' ', fmt = '%f')
 
-        depth_min = np.min(values)
-        depth_max = np.max(values)
+        depth_min = max(np.min(values), 0.5)
+        depth_max = min(np.max(values), 80.0)
 
         write_camera_file(count, intrinsics, pose, args.output_folder, depth_min, depth_max)
 
